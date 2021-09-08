@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>BO Spring Boot Example</title>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"  integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script src="https://cdn.datatables.net/1.11.1/js/jquery.dataTables.min.js" ></script>
+<script src="https://cdn.datatables.net/1.11.1/js/dataTables.bootstrap4.min.js" ></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<link href="https://cdn.datatables.net/1.11.1/css/dataTables.bootstrap4.min.css"/>
+<style>
+#example_filter {
+display: none;
+} 
+</style>
+<script>
+function checkSql(){
+	let formData = new FormData()
+	formData.append('sql', $('#sql').val())
+	
+	let item = {
+	  'url': '/testSql',
+	  'type': 'POST',
+	  'data': $('#form').serialize()
+	}
+
+	$.ajax(item)
+	.done(function (resp) {
+		$('#result').html('<table id="example"  class="table table-bordered"><thead></thead><tbody></tbody></table>');
+		if($.isArray(resp.data[0])){
+			let columns = [];
+			if(resp.data && resp.data.length > 0){
+				for(let i = 0;i < resp.data[0].length;i++){
+					columns.push({title: 'COL_' + i});
+				}
+			}
+			$('#example').DataTable( {
+			    data: resp.data,
+			    columns: columns
+			    
+			} );
+		}else{
+			let columns = [];
+			columns.push({title: 'COL_0'});
+			let tmp = [];
+			for(let i = 0;i < resp.data.length;i++){
+				let tmp0 = []
+				tmp0.push(resp.data[i]);
+				tmp.push(tmp0);
+			}
+			$('#example').DataTable( {
+			    data: tmp,
+			    columns: columns
+			    
+			} );
+		}
+		
+	})
+	.fail(function (response) {
+		console.log("error");
+	})
+	
+}
+</script>
+</head>
+<body>
+	
+	<div class="raw">
+		<div class="col-md-12">
+			<form id="form">
+				<label>請輸入測試SQL(查詢時請先使用VARSTRING進行查詢，確認JDBC有通，再試試其他型態)</label><br/>
+				<textarea id="sql" name="sql" cols="30" class="form-control" style="width:100vw">cluster select * from bo_example_user </textarea>
+				<button type="button" onclick="checkSql()" type="button" class="btn btn-primary" style="margin-top:10px">Test SQL</button>
+			</form>
+			<div id="result">
+			</div>
+			
+		</div>
+	</div>
+	
+</body>
+</html>
